@@ -1,0 +1,42 @@
+CREATE TABLE IF NOT EXISTS roles (
+  role_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  role_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_name VARCHAR(100) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  role_id INT REFERENCES roles(role_id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS products (
+  product_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  product_name VARCHAR(255) NOT NULL,
+  barcode VARCHAR(100),
+  gst_percentage DECIMAL(5, 2) DEFAULT 0,
+  category_id INT,
+  manufacturer_id INT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS product_batches (
+  batch_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  product_id INT NOT NULL REFERENCES products(product_id),
+  batch_number VARCHAR(100) NOT NULL,
+  expiry_date DATE,
+  purchase_price DECIMAL(10, 2) DEFAULT 0,
+  selling_price DECIMAL(10, 2) DEFAULT 0,
+  quantity INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sales_invoices (
+  invoice_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  customer_id INT,
+  total_amount DECIMAL(10, 2) DEFAULT 0,
+  gst_amount DECIMAL(10, 2) DEFAULT 0,
+  discount_amount DECIMAL(10, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

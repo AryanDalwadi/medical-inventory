@@ -1,0 +1,22 @@
+# Root-level gitignore to prevent committing node_modules or system files from subfolders
+
+# Dependency directories
+node_modules/
+dist/
+build/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Editor and System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
