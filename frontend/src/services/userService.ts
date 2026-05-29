@@ -2,6 +2,7 @@ import api from '../api';
 import type {
   ApiResponse,
   CreateUserPayload,
+  UpdateUserPayload,
   PaginatedResult,
   User,
   UserListFilters,
@@ -28,6 +29,16 @@ export async function createUser(payload: CreateUserPayload) {
 
   if (!data.success || !data.data) {
     throw new Error(data.message || 'Failed to create user');
+  }
+
+  return data.data;
+}
+
+export async function updateUser(userId: number, payload: UpdateUserPayload) {
+  const { data } = await api.put<ApiResponse<User>>(`/users/${userId}`, payload);
+
+  if (!data.success || !data.data) {
+    throw new Error(data.message || 'Failed to update user');
   }
 
   return data.data;

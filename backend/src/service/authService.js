@@ -18,6 +18,13 @@ async function login({ userName, password }) {
     throw err;
   }
 
+  // Check if user account is deactivated
+  if (user.status === 2) {
+    const err = new Error('Your account has been deactivated, Please contact to admin.');
+    err.statusCode = 403;
+    throw err;
+  }
+
   const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
   if (!isPasswordValid) {

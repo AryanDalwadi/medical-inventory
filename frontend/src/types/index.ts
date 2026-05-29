@@ -9,6 +9,7 @@ export interface User {
   userName: string;
   roleId: number;
   roleName?: string;
+  status?: number;
   createdAt?: string;
 }
 
@@ -34,6 +35,14 @@ export interface CreateUserPayload {
   userName: string;
   password: string;
   roleId: number;
+  status?: number;
+}
+
+export interface UpdateUserPayload {
+  userName?: string;
+  password?: string;
+  roleId?: number;
+  status?: number;
 }
 
 export interface RoleOption {

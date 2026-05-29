@@ -7,14 +7,15 @@ RETURNS TABLE (
   user_id INT,
   user_name VARCHAR(100),
   password_hash VARCHAR(255),
-  role_id INT
+  role_id INT,
+  status INT
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT u.user_id, u.user_name, u.password_hash, u.role_id
+  SELECT u.user_id, u.user_name, u.password_hash, u.role_id, u.status
   FROM users u
-  WHERE u.user_name = TRIM(p_user_name);
+  WHERE LOWER(u.user_name) = LOWER(TRIM(p_user_name));
 END;
 $$;

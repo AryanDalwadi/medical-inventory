@@ -10,6 +10,7 @@ RETURNS TABLE (
   user_name VARCHAR(100),
   role_id INT,
   role_name VARCHAR(100),
+  status INT,
   created_at TIMESTAMP,
   total_count BIGINT
 )
@@ -40,6 +41,7 @@ BEGIN
     u.user_name,
     u.role_id,
     r.role_name,
+    u.status,
     u.created_at,
     COUNT(*) OVER()::BIGINT AS total_count
   FROM users u

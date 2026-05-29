@@ -6,9 +6,13 @@ import {
   Button,
   CircularProgress,
   Paper,
-  TextField,
   Typography,
+  InputAdornment,
+  IconButton,
 } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { AppTextField } from '../components/common';
 import { useAuth } from '../context/AuthContext';
 import { appColors } from '../theme/theme';
 
@@ -18,6 +22,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -38,6 +43,8 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   return (
     <Box
@@ -81,24 +88,52 @@ export default function LoginPage() {
         )}
 
         <Box component="form" onSubmit={handleSubmit}>
-          <TextField
+          <AppTextField
             fullWidth
             label="Username"
             margin="normal"
             value={userName}
-            onChange={(e) => setUserName(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUserName(e.target.value)}
             required
             autoComplete="username"
           />
-          <TextField
+          <AppTextField
             fullWidth
             label="Password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             margin="normal"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }
+            }}
           />
           <Button
             fullWidth

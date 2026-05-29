@@ -64,15 +64,16 @@ function DefaultCard<T extends object>({
 
   return (
     <Card
-      elevation={2}
+      elevation={0}
       sx={{
         height: '100%',
         borderRadius: 3,
         border: `1px solid ${appColors.border}`,
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: 6,
+          transform: 'translateY(-2px)',
+          borderColor: 'text.secondary',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
         },
       }}
     >
@@ -144,38 +145,48 @@ export default function DataList<T extends object>({
           px: 3,
           py: 2,
           display: 'flex',
-          flexWrap: 'wrap',
+          flexWrap: { xs: 'wrap', md: 'nowrap' },
           gap: 2,
           alignItems: 'center',
           justifyContent: 'space-between',
           background: `linear-gradient(90deg, ${appColors.secondaryLight} 0%, ${appColors.primaryLight} 100%)`,
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700, color: appColors.primary }}>
-          {title}
-        </Typography>
+        {/* Left Side: Title and Search Filter */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'nowrap', flexGrow: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: appColors.primary, whiteSpace: 'nowrap' }}>
+            {title}
+          </Typography>
 
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', alignItems: 'center' }}>
           {onSearchChange && (
-            <AppTextField
-              value={searchValue}
-              placeholder={searchPlaceholder}
-              onChange={(event) => onSearchChange(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' && onSearchSubmit) {
-                  onSearchSubmit();
-                }
-              }}
-              sx={{ minWidth: 220 }}
-            />
+            <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'nowrap', alignItems: 'center' }}>
+              <AppTextField
+                value={searchValue}
+                placeholder={searchPlaceholder}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => onSearchChange(event.target.value)}
+                onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                  if (event.key === 'Enter' && onSearchSubmit) {
+                    onSearchSubmit();
+                  }
+                }}
+                sx={{ minWidth: 150, maxWidth: 240 }}
+                fullWidth={false}
+              />
+              {onSearchSubmit && (
+                <AppButton variant="outlined" onClick={onSearchSubmit} sx={{ whiteSpace: 'nowrap' }}>
+                  Search
+                </AppButton>
+              )}
+            </Box>
           )}
-          {onSearchSubmit && (
-            <AppButton variant="outlined" onClick={onSearchSubmit}>
-              Search
-            </AppButton>
-          )}
-          {onAddClick && <AppButton onClick={onAddClick}>{addButtonLabel}</AppButton>}
         </Box>
+
+        {/* Right Side: Add Action Button */}
+        {onAddClick && (
+          <AppButton onClick={onAddClick} sx={{ whiteSpace: 'nowrap' }}>
+            {addButtonLabel}
+          </AppButton>
+        )}
       </Box>
 
       <Box sx={{ p: 3 }}>

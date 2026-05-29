@@ -53,7 +53,6 @@ async function setupDatabase() {
   const proceduresDir = path.join(__dirname, '..', 'database', 'procedures');
 
   await runSqlFile(client, schemaPath);
-  await runSqlFile(client, seedPath);
 
   if (fs.existsSync(migrationsDir)) {
     const migrationFiles = fs
@@ -65,6 +64,8 @@ async function setupDatabase() {
       await runSqlFile(client, path.join(migrationsDir, file));
     }
   }
+
+  await runSqlFile(client, seedPath);
 
   if (fs.existsSync(proceduresDir)) {
     const procedureFiles = fs

@@ -1,6 +1,7 @@
-import { TextField, type TextFieldProps } from '@mui/material';
+import { TextField } from '@mui/material';
 
-export default function AppTextField(props: TextFieldProps) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function AppTextField(props: any) {
   return (
     <TextField
       fullWidth

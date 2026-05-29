@@ -1,12 +1,12 @@
 import { createTheme } from '@mui/material/styles';
 
 export const appColors = {
-  primary: '#1565c0',
-  primaryLight: '#e3f2fd',
-  secondary: '#2e7d32',
-  secondaryLight: '#e8f5e9',
-  background: '#f4f7fb',
-  border: '#e3f2fd',
+  primary: '#18181b',          // zinc-900 / premium dark charcoal
+  primaryLight: '#f4f4f5',     // zinc-100 / soft light gray
+  secondary: '#27272a',        // zinc-800 / secondary charcoal
+  secondaryLight: '#fafafa',   // zinc-50 / off-white
+  background: '#fafafa',       // zinc-50 / pure soft light mode background
+  border: '#e4e4e7',           // zinc-200 / modern clean borders
 };
 
 const theme = createTheme({
@@ -14,13 +14,13 @@ const theme = createTheme({
     mode: 'light',
     primary: {
       main: appColors.primary,
-      light: '#42a5f5',
-      dark: '#0d47a1',
+      light: '#52525b',        // zinc-600
+      dark: '#09090b',         // zinc-950
     },
     secondary: {
       main: appColors.secondary,
-      light: '#4caf50',
-      dark: '#1b5e20',
+      light: '#71717a',        // zinc-500
+      dark: '#18181b',         // zinc-900
     },
     background: {
       default: appColors.background,
@@ -28,9 +28,9 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h5: { fontWeight: 700, color: appColors.primary },
-    h6: { fontWeight: 700 },
+    h6: { fontWeight: 700, color: appColors.primary },
   },
   shape: {
     borderRadius: 12,
@@ -46,7 +46,8 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          boxShadow: '0 1px 8px rgba(21, 101, 192, 0.12)',
+          boxShadow: 'none',
+          borderBottom: `1px solid ${appColors.border}`,
         },
       },
     },
@@ -54,6 +55,8 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
+          border: `1px solid ${appColors.border}`,
+          boxShadow: 'none',
         },
       },
     },

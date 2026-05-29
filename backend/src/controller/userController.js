@@ -20,4 +20,14 @@ async function getUsers(req, res, next) {
   }
 }
 
-module.exports = { insertUser, getUsers };
+async function updateUser(req, res, next) {
+  try {
+    const userId = Number(req.params.id);
+    const updatedUser = await userService.updateUser(userId, req.body);
+    return successResponse(res, 'User updated successfully', updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+module.exports = { insertUser, getUsers, updateUser };

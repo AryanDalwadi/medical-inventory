@@ -18,22 +18,22 @@ const cards = [
     title: 'Products',
     description: 'Inventory and product batches',
     icon: InventoryIcon,
-    color: appColors.secondary,
-    bg: appColors.secondaryLight,
+    color: '#3f3f46',
+    bg: appColors.primaryLight,
   },
   {
     title: 'Billing',
     description: 'POS and sales invoices',
     icon: PointOfSaleIcon,
-    color: '#6a1b9a',
-    bg: '#f3e5f5',
+    color: '#71717a',
+    bg: appColors.primaryLight,
   },
   {
     title: 'Reports',
     description: 'Sales and stock analytics',
     icon: ReceiptLongIcon,
-    color: '#e65100',
-    bg: '#fff3e0',
+    color: '#a1a1aa',
+    bg: appColors.primaryLight,
   },
 ];
 
@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
         Welcome back{user ? `, ${user.userName}` : ''}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -55,12 +55,18 @@ export default function DashboardPage() {
           return (
             <Grid key={card.title} size={{ xs: 12, sm: 6, xl: 3 }}>
               <Paper
-                elevation={1}
+                elevation={0}
                 sx={{
                   p: 3,
                   borderRadius: 3,
                   height: '100%',
-                  border: '1px solid #eef2f7',
+                  border: `1px solid ${appColors.border}`,
+                  transition: 'transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    borderColor: 'text.secondary',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)',
+                  },
                 }}
               >
                 <Box

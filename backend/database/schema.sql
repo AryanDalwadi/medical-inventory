@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   user_name VARCHAR(100) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   role_id INT REFERENCES roles(role_id),
+  status INT DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
