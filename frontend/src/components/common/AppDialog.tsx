@@ -6,6 +6,7 @@ import {
   type DialogProps,
 } from '@mui/material';
 import AppButton from './AppButton';
+import { appColors } from '../../theme/theme';
 
 interface AppDialogProps extends Omit<DialogProps, 'onClose'> {
   open: boolean;
@@ -37,7 +38,7 @@ export default function AppDialog({
 }: AppDialogProps) {
   return (
     <Dialog open={open} onClose={onClose} maxWidth={maxWidth} fullWidth={fullWidth} {...props}>
-      <DialogTitle sx={{ fontWeight: 700, color: '#1565c0' }}>{title}</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700, color: appColors.primary }}>{title}</DialogTitle>
       <DialogContent dividers>{children}</DialogContent>
       {showActions && (
         <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
@@ -48,9 +49,6 @@ export default function AppDialog({
             <AppButton
               onClick={onSave}
               disabled={saveDisabled || loading}
-              sx={{
-                background: 'linear-gradient(90deg, #2e7d32 0%, #1565c0 100%)',
-              }}
             >
               {saveLabel}
             </AppButton>

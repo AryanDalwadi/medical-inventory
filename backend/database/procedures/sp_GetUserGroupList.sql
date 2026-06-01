@@ -1,16 +1,13 @@
-DROP FUNCTION IF EXISTS sp_getuserlist(character varying, integer, integer);
+DROP FUNCTION IF EXISTS sp_getusergrouplist(character varying, integer, integer);
 
-CREATE OR REPLACE FUNCTION sp_GetUserList(
-  p_user_name VARCHAR(100) DEFAULT NULL,
+CREATE OR REPLACE FUNCTION sp_GetUserGroupList(
+  p_role_name VARCHAR(50) DEFAULT NULL,
   p_page INT DEFAULT 1,
   p_page_size INT DEFAULT 10
 )
 RETURNS TABLE (
-  user_id UUID,
-  user_name VARCHAR(100),
-  full_name VARCHAR(100),
-  role_id UUID,
-  role_name VARCHAR(100),
+  id UUID,
+  role_name VARCHAR(50),
   status INT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
@@ -41,27 +38,23 @@ BEGIN
 
   RETURN QUERY
   SELECT
-    u.user_id,
-    u.user_name,
-    u.full_name,
-    u.role_id,
-    r.role_name,
-    u.status,
-    u.created_at,
-    u.updated_at,
+    g.id,
+    g.role_name,
+    g.status,
+    g.created_at,
+    g.updated_at,
     uc.user_name AS created_by_name,
     uu.user_name AS updated_by_name,
     COUNT(*) OVER()::BIGINT AS total_count
-  FROM users u
-  LEFT JOIN user_group r ON u.role_id = r.id
-  LEFT JOIN users uc ON u.created_by = uc.user_id
-  LEFT JOIN users uu ON u.updated_by = uu.user_id
+  FROM user_group g
+  LEFT JOIN users uc ON g.created_by = uc.user_id
+  LEFT JOIN users uu ON g.updated_by = uu.user_id
   WHERE (
-    p_user_name IS NULL
-    OR TRIM(p_user_name) = ''
-    OR u.user_name ILIKE '%' || TRIM(p_user_name) || '%'
+    p_role_name IS NULL
+    OR TRIM(p_role_name) = ''
+    OR g.role_name ILIKE '%' || TRIM(p_role_name) || '%'
   )
-  ORDER BY u.created_at DESC  -- Order by newest created first
+  ORDER BY g.role_name ASC
   LIMIT v_page_size
   OFFSET v_offset;
 END;

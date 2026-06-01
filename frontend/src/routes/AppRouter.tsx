@@ -9,6 +9,7 @@ import { appColors } from '../theme/theme';
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 const UsersPage = lazy(() => import('../pages/UsersPage'));
+const UserGroupsPage = lazy(() => import('../pages/UserGroupsPage'));
 
 /**
  * Premium Loading Indicator centered on the screen.
@@ -37,6 +38,7 @@ export default function AppRouter() {
           <Route element={<DashboardLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/groups" element={<UserGroupsPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

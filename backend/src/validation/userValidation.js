@@ -2,8 +2,9 @@ const Joi = require('joi');
 
 const insertUserSchema = Joi.object({
   userName: Joi.string().trim().min(3).max(100).required(),
+  fullName: Joi.string().trim().max(100).allow('', null).optional(),
   password: Joi.string().min(6).max(100).required(),
-  roleId: Joi.number().integer().positive().required(),
+  roleId: Joi.string().uuid().required(),
   status: Joi.number().integer().valid(1, 2).default(1).optional(),
 });
 
@@ -21,8 +22,9 @@ const searchUsersSchema = Joi.object({
 
 const updateUserSchema = Joi.object({
   userName: Joi.string().trim().min(3).max(100).optional(),
+  fullName: Joi.string().trim().max(100).allow('', null).optional(),
   password: Joi.string().min(6).max(100).optional(),
-  roleId: Joi.number().integer().positive().optional(),
+  roleId: Joi.string().uuid().optional(),
   status: Joi.number().integer().valid(1, 2).optional(),
 });
 

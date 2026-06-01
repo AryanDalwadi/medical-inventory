@@ -5,12 +5,16 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface User {
-  userId: number;
+  userId: string;
   userName: string;
-  roleId: number;
+  fullName?: string;
+  roleId: string;
   roleName?: string;
   status?: number;
   createdAt?: string;
+  updatedAt?: string;
+  createdByName?: string;
+  updatedByName?: string;
 }
 
 export interface LoginResponse {
@@ -33,19 +37,21 @@ export interface UserListFilters {
 
 export interface CreateUserPayload {
   userName: string;
+  fullName?: string;
   password: string;
-  roleId: number;
+  roleId: string;
   status?: number;
 }
 
 export interface UpdateUserPayload {
   userName?: string;
+  fullName?: string;
   password?: string;
-  roleId?: number;
+  roleId?: string;
   status?: number;
 }
 
 export interface RoleOption {
-  roleId: number;
+  roleId: string;
   roleName: string;
 }

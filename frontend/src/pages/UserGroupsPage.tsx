@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Box, MenuItem, Card, CardContent, CardActions, Typography, IconButton, InputAdornment } from '@mui/material';
+import { Alert, Box, Card, CardContent, CardActions, Typography, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import {
   AppFormDialog,
   AppTextField,
@@ -10,14 +8,20 @@ import {
   DataList,
   type DataListColumn,
 } from '../components/common';
-import { createUser, getUsers, updateUser, getUserGroups } from '../services/userService';
-import type { RoleOption, User } from '../types';
+import { createUserGroup, getUserGroups, updateUserGroup } from '../services/userService';
+import type { RoleOption } from '../types';
 import { appColors } from '../theme/theme';
 
-const columns: DataListColumn<User>[] = [
-  { key: 'userName', label: 'Username', isTitle: true },
-  { key: 'fullName', label: 'Full Name', isSubtitle: true },
-  { key: 'roleName', label: 'Role' },
+interface UserGroupRow extends RoleOption {
+  status?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  createdByName?: string;
+  updatedByName?: string;
+}
+
+const columns: DataListColumn<UserGroupRow>[] = [
+  { key: 'roleName', label: 'Group Name', isTitle: true },
   {
     key: 'status',
     label: 'Status',
@@ -65,16 +69,12 @@ const columns: DataListColumn<User>[] = [
 ];
 
 const emptyForm = {
-  userName: '',
-  fullName: '',
-  password: '',
-  roleId: '',
+  roleName: '',
   status: 1,
 };
 
-export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [roleOptions, setRoleOptions] = useState<RoleOption[]>([]);
+export default function UserGroupsPage() {
+  const [groups, setGroups] = useState<UserGroupRow[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -87,66 +87,47 @@ export default function UsersPage() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
   const [form, setForm] = useState(emptyForm);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<UserGroupRow | null>(null);
 
-  const fetchUsers = useCallback(async () => {
+  const fetchGroups = useCallback(async () => {
     setLoading(true);
     setError('');
 
     try {
-      const result = await getUsers({
-        page,
-        pageSize,
-        userName: searchTerm || undefined,
+      const result = await getUserGroups({
+        roleName: searchTerm || undefined,
       });
-      setUsers(result.items);
-      setTotal(result.total);
+
+      interface UserGroupWithTotal extends UserGroupRow {
+        totalCount?: number;
+      }
+      const rows = result as UserGroupRow[];
+      setGroups(rows.slice((page - 1) * pageSize, page * pageSize));
+      setTotal(rows.length > 0 ? (rows[0] as UserGroupWithTotal).totalCount || rows.length : 0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load users');
+      setError(err instanceof Error ? err.message : 'Failed to load user groups');
     } finally {
       setLoading(false);
     }
   }, [page, pageSize, searchTerm]);
-
-  const fetchGroups = useCallback(async () => {
-    try {
-      const groups = await getUserGroups();
-      setRoleOptions(groups);
-    } catch (err) {
-      console.error('Failed to load user groups:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
   useEffect(() => {
     fetchGroups();
   }, [fetchGroups]);
 
   const handleOpenDialog = () => {
-    setSelectedUser(null);
-    setForm({
-      ...emptyForm,
-      roleId: roleOptions.length > 0 ? roleOptions[0].roleId : '',
-    });
-    setShowPassword(false);
+    setSelectedGroup(null);
+    setForm(emptyForm);
     setFormError('');
     setDialogOpen(true);
   };
 
-  const handleEditClick = (user: User) => {
-    setSelectedUser(user);
+  const handleEditClick = (group: UserGroupRow) => {
+    setSelectedGroup(group);
     setForm({
-      userName: user.userName,
-      fullName: user.fullName || '',
-      password: '••••••••', // Seed dummy disabled password representation
-      roleId: user.roleId,
-      status: user.status || 1,
+      roleName: group.roleName,
+      status: group.status || 1,
     });
-    setShowPassword(false);
     setFormError('');
     setDialogOpen(true);
   };
@@ -159,13 +140,8 @@ export default function UsersPage() {
   };
 
   const handleSave = async () => {
-    // Validations: Password is required only in Add Mode
-    if (!selectedUser && (!form.userName.trim() || !form.password.trim())) {
-      setFormError('Username and password are required');
-      return;
-    }
-    if (selectedUser && !form.userName.trim()) {
-      setFormError('Username is required');
+    if (!form.roleName.trim()) {
+      setFormError('Group name is required');
       return;
     }
 
@@ -173,36 +149,29 @@ export default function UsersPage() {
     setFormError('');
 
     try {
-      if (selectedUser) {
-        // Edit Mode (password is disabled, omit from update)
-        await updateUser(selectedUser.userId, {
-          userName: form.userName.trim(),
-          fullName: form.fullName.trim() || undefined,
-          roleId: form.roleId,
+      if (selectedGroup) {
+        // Edit Mode
+        await updateUserGroup(selectedGroup.roleId, {
+          roleName: form.roleName.trim(),
           status: Number(form.status),
         });
       } else {
         // Add Mode
-        await createUser({
-          userName: form.userName.trim(),
-          fullName: form.fullName.trim() || undefined,
-          password: form.password.trim(),
-          roleId: form.roleId,
+        await createUserGroup({
+          roleName: form.roleName.trim(),
           status: Number(form.status),
         });
       }
       setDialogOpen(false);
       setForm(emptyForm);
-      setSelectedUser(null);
-      await fetchUsers();
+      setSelectedGroup(null);
+      await fetchGroups();
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Failed to save user');
+      setFormError(err instanceof Error ? err.message : 'Failed to save user group');
     } finally {
       setSaving(false);
     }
   };
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   return (
     <Box>
@@ -213,16 +182,16 @@ export default function UsersPage() {
       )}
 
       <DataList
-        title="Manage Users"
+        title="Manage User Groups"
         columns={columns}
-        rows={users}
+        rows={groups}
         total={total}
         page={page}
         pageSize={pageSize}
         loading={loading}
         searchValue={searchInput}
-        searchPlaceholder="Filter by username"
-        addButtonLabel="Add User"
+        searchPlaceholder="Filter by group name"
+        addButtonLabel="Add Group"
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
         onSearchChange={setSearchInput}
@@ -231,8 +200,8 @@ export default function UsersPage() {
           setSearchTerm(searchInput.trim());
         }}
         onAddClick={handleOpenDialog}
-        renderCard={(user) => {
-          const isActive = user.status === 1;
+        renderCard={(group) => {
+          const isActive = group.status === 1;
           return (
             <Card
               elevation={0}
@@ -252,24 +221,8 @@ export default function UsersPage() {
               }}
             >
               <CardContent sx={{ p: 2.5, pb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: appColors.primary, mb: 0.5 }}>
-                  {user.userName}
-                </Typography>
-
-                <Typography
-                  variant="body2"
-                  sx={{
-                    display: 'inline-block',
-                    mb: 2,
-                    px: 1.2,
-                    py: 0.3,
-                    borderRadius: 1,
-                    bgcolor: appColors.secondaryLight,
-                    color: appColors.secondary,
-                    fontWeight: 600,
-                  }}
-                >
-                  {user.roleName || '-'}
+                <Typography variant="h6" sx={{ fontWeight: 700, color: appColors.primary, mb: 2 }}>
+                  {group.roleName}
                 </Typography>
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
@@ -298,8 +251,8 @@ export default function UsersPage() {
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
                       Created By
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={user.createdByName || '-'}>
-                      {user.createdByName || '-'}
+                    <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={group.createdByName || '-'}>
+                      {group.createdByName || '-'}
                     </Typography>
                   </Box>
 
@@ -308,7 +261,7 @@ export default function UsersPage() {
                       Created At
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
-                      {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+                      {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : '-'}
                     </Typography>
                   </Box>
 
@@ -316,8 +269,8 @@ export default function UsersPage() {
                     <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
                       Updated By
                     </Typography>
-                    <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={user.updatedByName || '-'}>
-                      {user.updatedByName || '-'}
+                    <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={group.updatedByName || '-'}>
+                      {group.updatedByName || '-'}
                     </Typography>
                   </Box>
 
@@ -326,7 +279,7 @@ export default function UsersPage() {
                       Updated At
                     </Typography>
                     <Typography variant="body2" sx={{ fontWeight: 500, mt: 0.5 }}>
-                      {user.updatedAt ? new Date(user.updatedAt).toLocaleString() : '-'}
+                      {group.updatedAt ? new Date(group.updatedAt).toLocaleString() : '-'}
                     </Typography>
                   </Box>
                 </Box>
@@ -335,9 +288,9 @@ export default function UsersPage() {
               <CardActions sx={{ justifyContent: 'flex-end', px: 2.5, pb: 2.5, pt: 0 }}>
                 <IconButton
                   size="small"
-                  onClick={() => handleEditClick(user)}
+                  onClick={() => handleEditClick(group)}
                   sx={{ color: appColors.primary }}
-                  title="Edit User"
+                  title="Edit Group"
                 >
                   <EditIcon fontSize="small" />
                 </IconButton>
@@ -349,7 +302,7 @@ export default function UsersPage() {
 
       <AppFormDialog
         open={dialogOpen}
-        title={selectedUser ? 'Edit User' : 'Add User'}
+        title={selectedGroup ? 'Edit Group' : 'Add Group'}
         onClose={handleCloseDialog}
         onSave={handleSave}
         saveLabel="Save"
@@ -358,75 +311,13 @@ export default function UsersPage() {
       >
         {formError && <Alert severity="error" sx={{ mb: 2 }}>{formError}</Alert>}
         <AppTextField
-          label="Username"
-          value={form.userName}
+          label="Group Name"
+          value={form.roleName}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setForm((prev) => ({ ...prev, userName: event.target.value }))
+            setForm((prev) => ({ ...prev, roleName: event.target.value }))
           }
           required
         />
-        <AppTextField
-          label="Full Name"
-          value={form.fullName}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setForm((prev) => ({ ...prev, fullName: event.target.value }))
-          }
-        />
-        <AppTextField
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          value={form.password}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setForm((prev) => ({ ...prev, password: event.target.value }))
-          }
-          required={!selectedUser}
-          disabled={!!selectedUser}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={handleClickShowPassword}
-                  edge="end"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          slotProps={{
-            input: {
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }
-          }}
-        />
-        <AppTextField
-          select
-          label="Role"
-          value={form.roleId}
-          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-            setForm((prev) => ({
-              ...prev,
-              roleId: event.target.value,
-            }))
-          }
-        >
-          {roleOptions.map((role) => (
-            <MenuItem key={role.roleId} value={role.roleId}>
-              {role.roleName}
-            </MenuItem>
-          ))}
-        </AppTextField>
         <AppCheckbox
           label="Active"
           checked={form.status === 1}

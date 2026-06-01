@@ -1,11 +1,17 @@
 DROP FUNCTION IF EXISTS sp_updateuser(integer, character varying, text, integer, integer);
+DROP FUNCTION IF EXISTS sp_updateuser(integer, character varying, text, uuid, integer);
+DROP FUNCTION IF EXISTS sp_updateuser(uuid, character varying, text, uuid, integer);
+DROP FUNCTION IF EXISTS sp_updateuser(uuid, character varying, text, uuid, integer, uuid);
+DROP FUNCTION IF EXISTS sp_updateuser(uuid, character varying, text, uuid, integer, character varying, uuid);
 
 CREATE OR REPLACE FUNCTION sp_UpdateUser(
-  p_user_id INT,
+  p_user_id UUID,
   p_user_name VARCHAR(100) DEFAULT NULL,
   p_password_hash TEXT DEFAULT NULL,
-  p_role_id INT DEFAULT NULL,
-  p_status INT DEFAULT NULL
+  p_role_id UUID DEFAULT NULL,
+  p_status INT DEFAULT NULL,
+  p_full_name VARCHAR(100) DEFAULT NULL,
+  p_updated_by UUID DEFAULT NULL
 )
 RETURNS VOID
 LANGUAGE plpgsql
@@ -34,7 +40,7 @@ BEGIN
   END IF;
 
   -- Validate role_id exists if provided
-  IF p_role_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM roles WHERE role_id = p_role_id) THEN
+  IF p_role_id IS NOT NULL AND NOT EXISTS (SELECT 1 FROM user_group WHERE id = p_role_id) THEN
     RAISE EXCEPTION 'Invalid role_id';
   END IF;
 
@@ -43,13 +49,21 @@ BEGIN
     RAISE EXCEPTION 'Invalid status. Status must be 1 (Active) or 2 (Deactive)';
   END IF;
 
+  -- Validate updated_by exists if provided
+  IF p_updated_by IS NOT NULL AND NOT EXISTS (SELECT 1 FROM users WHERE user_id = p_updated_by) THEN
+    RAISE EXCEPTION 'Invalid updated_by user ID';
+  END IF;
+
   -- Apply update
   UPDATE users
   SET
     user_name = COALESCE(TRIM(p_user_name), user_name),
+    full_name = COALESCE(TRIM(p_full_name), full_name),
     password_hash = COALESCE(p_password_hash, password_hash),
     role_id = COALESCE(p_role_id, role_id),
-    status = COALESCE(p_status, status)
+    status = COALESCE(p_status, status),
+    updated_at = CURRENT_TIMESTAMP,
+    updated_by = p_updated_by
   WHERE user_id = p_user_id;
 
 END;

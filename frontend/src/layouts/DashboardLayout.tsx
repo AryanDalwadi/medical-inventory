@@ -20,6 +20,8 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from '../context/AuthContext';
 import { appColors } from '../theme/theme';
 import { drawerWidth, navItems } from './navConfig';
@@ -173,10 +175,30 @@ export default function DashboardLayout() {
             onClose={() => setAnchorEl(null)}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            slotProps={{
+              paper: {
+                sx: {
+                  mt: 1.5,
+                  minWidth: 180,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                  borderRadius: 2,
+                  border: `1px solid ${appColors.border}`,
+                }
+              }
+            }}
           >
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} />
-              Logout
+            <MenuItem onClick={() => setAnchorEl(null)} sx={{ py: 1 }}>
+              <AccountCircleIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+              Profile
+            </MenuItem>
+            <MenuItem onClick={() => setAnchorEl(null)} sx={{ py: 1 }}>
+              <SettingsIcon fontSize="small" sx={{ mr: 1.5, color: 'text.secondary' }} />
+              Settings
+            </MenuItem>
+            <Divider sx={{ my: 1 }} />
+            <MenuItem onClick={handleLogout} sx={{ py: 1 }}>
+              <LogoutIcon fontSize="small" sx={{ mr: 1.5, color: 'error.main' }} />
+              <Typography sx={{ color: 'error.main', fontWeight: 600, fontSize: '0.9rem' }}>Logout</Typography>
             </MenuItem>
           </Menu>
         </Toolbar>

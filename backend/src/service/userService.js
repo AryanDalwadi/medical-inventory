@@ -1,19 +1,20 @@
 const bcrypt = require('bcrypt');
 const { getPool } = require('../data_access/dbConnection');
 
-async function createUser({ userName, password, roleId, status }) {
+async function createUser({ userName, fullName, password, roleId, status, createdBy }) {
   const passwordHash = await bcrypt.hash(password, 10);
   const pool = getPool();
 
   try {
     const result = await pool.query(
-      'SELECT sp_insertuser($1, $2, $3, $4) AS user_id',
-      [userName, passwordHash, roleId, status !== undefined ? status : 1]
+      'SELECT sp_insertuser($1, $2, $3, $4, $5, $6) AS user_id',
+      [userName, passwordHash, roleId, status !== undefined ? status : 1, fullName || null, createdBy || null]
     );
 
     return {
       userId: result.rows[0].user_id,
       userName,
+      fullName,
       roleId,
       status: status !== undefined ? status : 1
     };
@@ -47,10 +48,14 @@ async function getUsers({ userName, page, pageSize }) {
   const items = rows.map((row) => ({
     userId: row.user_id,
     userName: row.user_name,
+    fullName: row.full_name,
     roleId: row.role_id,
     roleName: row.role_name,
     status: row.status,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    createdByName: row.created_by_name,
+    updatedByName: row.updated_by_name,
   }));
 
   return {
@@ -61,7 +66,7 @@ async function getUsers({ userName, page, pageSize }) {
   };
 }
 
-async function updateUser(userId, { userName, password, roleId, status }) {
+async function updateUser(userId, { userName, fullName, password, roleId, status, updatedBy }) {
   const pool = getPool();
   let passwordHash = null;
   if (password) {
@@ -70,13 +75,14 @@ async function updateUser(userId, { userName, password, roleId, status }) {
 
   try {
     await pool.query(
-      'SELECT sp_updateuser($1, $2, $3, $4, $5)',
-      [userId, userName || null, passwordHash || null, roleId || null, status || null]
+      'SELECT sp_updateuser($1, $2, $3, $4, $5, $6, $7)',
+      [userId, userName || null, passwordHash || null, roleId || null, status || null, fullName || null, updatedBy || null]
     );
 
     return {
       userId,
       userName,
+      fullName,
       roleId,
       status
     };
