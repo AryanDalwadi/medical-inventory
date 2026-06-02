@@ -1,10 +1,11 @@
-DROP FUNCTION IF EXISTS sp_updateusergroup(uuid, character varying, integer);
 DROP FUNCTION IF EXISTS sp_updateusergroup(uuid, character varying, integer, uuid);
+DROP FUNCTION IF EXISTS sp_updateusergroup(uuid, character varying, integer, boolean, uuid);
 
 CREATE OR REPLACE FUNCTION sp_UpdateUserGroup(
   p_id UUID,
   p_role_name VARCHAR(50) DEFAULT NULL,
   p_status INT DEFAULT NULL,
+  p_sys_admin BOOLEAN DEFAULT NULL,
   p_updated_by UUID DEFAULT NULL
 )
 RETURNS VOID
@@ -48,6 +49,7 @@ BEGIN
   SET
     role_name = COALESCE(TRIM(p_role_name), role_name),
     status = COALESCE(p_status, status),
+    sys_admin = COALESCE(p_sys_admin, sys_admin),
     updated_at = CURRENT_TIMESTAMP,
     updated_by = p_updated_by
   WHERE id = p_id;

@@ -14,6 +14,7 @@ import { appColors } from '../theme/theme';
 
 interface UserGroupRow extends RoleOption {
   status?: number;
+  sysAdmin?: boolean;
   createdAt?: string;
   updatedAt?: string;
   createdByName?: string;
@@ -22,6 +23,28 @@ interface UserGroupRow extends RoleOption {
 
 const columns: DataListColumn<UserGroupRow>[] = [
   { key: 'roleName', label: 'Group Name', isTitle: true },
+  {
+    key: 'sysAdmin',
+    label: 'Sys Admin',
+    render: (row) => {
+      const isSysAdmin = !!row.sysAdmin;
+      return (
+        <span
+          style={{
+            display: 'inline-block',
+            padding: '2px 8px',
+            borderRadius: '4px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            backgroundColor: isSysAdmin ? '#ffebee' : '#f5f5f5',
+            color: isSysAdmin ? '#c62828' : '#616161',
+          }}
+        >
+          {isSysAdmin ? 'Yes' : 'No'}
+        </span>
+      );
+    },
+  },
   {
     key: 'status',
     label: 'Status',
@@ -71,6 +94,7 @@ const columns: DataListColumn<UserGroupRow>[] = [
 const emptyForm = {
   roleName: '',
   status: 1,
+  sysAdmin: false,
 };
 
 export default function UserGroupsPage() {
@@ -127,6 +151,7 @@ export default function UserGroupsPage() {
     setForm({
       roleName: group.roleName,
       status: group.status || 1,
+      sysAdmin: !!group.sysAdmin,
     });
     setFormError('');
     setDialogOpen(true);
@@ -154,12 +179,14 @@ export default function UserGroupsPage() {
         await updateUserGroup(selectedGroup.roleId, {
           roleName: form.roleName.trim(),
           status: Number(form.status),
+          sysAdmin: form.sysAdmin,
         });
       } else {
         // Add Mode
         await createUserGroup({
           roleName: form.roleName.trim(),
           status: Number(form.status),
+          sysAdmin: form.sysAdmin,
         });
       }
       setDialogOpen(false);
@@ -202,6 +229,7 @@ export default function UserGroupsPage() {
         onAddClick={handleOpenDialog}
         renderCard={(group) => {
           const isActive = group.status === 1;
+          const isSysAdmin = !!group.sysAdmin;
           return (
             <Card
               elevation={0}
@@ -243,6 +271,27 @@ export default function UserGroupsPage() {
                         }}
                       >
                         {isActive ? 'Active' : 'Deactive'}
+                      </span>
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block' }}>
+                      Sys Admin
+                    </Typography>
+                    <Box sx={{ mt: 0.5 }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          backgroundColor: isSysAdmin ? '#ffebee' : '#f5f5f5',
+                          color: isSysAdmin ? '#c62828' : '#616161',
+                        }}
+                      >
+                        {isSysAdmin ? 'Yes' : 'No'}
                       </span>
                     </Box>
                   </Box>
@@ -317,6 +366,16 @@ export default function UserGroupsPage() {
             setForm((prev) => ({ ...prev, roleName: event.target.value }))
           }
           required
+        />
+        <AppCheckbox
+          label="System Admin"
+          checked={form.sysAdmin}
+          onChange={(event) =>
+            setForm((prev) => ({
+              ...prev,
+              sysAdmin: event.target.checked,
+            }))
+          }
         />
         <AppCheckbox
           label="Active"

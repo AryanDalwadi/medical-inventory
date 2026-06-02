@@ -57,7 +57,7 @@ export async function getUserGroups(filters?: { roleName?: string }) {
   return data.data;
 }
 
-export async function createUserGroup(payload: { roleName: string; status?: number }) {
+export async function createUserGroup(payload: { roleName: string; status?: number; sysAdmin?: boolean }) {
   const { data } = await api.post<ApiResponse<RoleOption>>('/groups', payload);
 
   if (!data.success || !data.data) {
@@ -67,7 +67,7 @@ export async function createUserGroup(payload: { roleName: string; status?: numb
   return data.data;
 }
 
-export async function updateUserGroup(id: string, payload: { roleName?: string; status?: number }) {
+export async function updateUserGroup(id: string, payload: { roleName?: string; status?: number; sysAdmin?: boolean }) {
   const { data } = await api.put<ApiResponse<RoleOption>>(`/groups/${id}`, payload);
 
   if (!data.success || !data.data) {

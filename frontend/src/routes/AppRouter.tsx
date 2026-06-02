@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage'));
 const UsersPage = lazy(() => import('../pages/UsersPage'));
 const UserGroupsPage = lazy(() => import('../pages/UserGroupsPage'));
+const MenuManagementPage = lazy(() => import('../pages/MenuManagementPage'));
 
 /**
  * Premium Loading Indicator centered on the screen.
@@ -39,6 +40,7 @@ export default function AppRouter() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/users" element={<UsersPage />} />
             <Route path="/groups" element={<UserGroupsPage />} />
+            <Route path="/settings/menus" element={<MenuManagementPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

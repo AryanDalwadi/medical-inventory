@@ -1,9 +1,10 @@
-DROP FUNCTION IF EXISTS sp_insertusergroup(character varying, integer);
 DROP FUNCTION IF EXISTS sp_insertusergroup(character varying, integer, uuid);
+DROP FUNCTION IF EXISTS sp_insertusergroup(character varying, integer, boolean, uuid);
 
 CREATE OR REPLACE FUNCTION sp_InsertUserGroup(
   p_role_name VARCHAR(50),
   p_status INT DEFAULT 1,
+  p_sys_admin BOOLEAN DEFAULT FALSE,
   p_created_by UUID DEFAULT NULL
 )
 RETURNS UUID
@@ -33,8 +34,8 @@ BEGIN
   END IF;
 
   -- Insert user group
-  INSERT INTO user_group (role_name, status, created_by)
-  VALUES (TRIM(p_role_name), COALESCE(p_status, 1), p_created_by)
+  INSERT INTO user_group (role_name, status, sys_admin, created_by)
+  VALUES (TRIM(p_role_name), COALESCE(p_status, 1), COALESCE(p_sys_admin, FALSE), p_created_by)
   RETURNING id INTO v_id;
 
   RETURN v_id;
